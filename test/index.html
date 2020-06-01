@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test client</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+    <script>
+        var socket = io('http://localhost:3007');
+
+        function user_login() {
+            socket.emit('user_login', JSON.stringify({
+                login: 'john',
+                pswd: '1234'
+            }));
+        }
+
+        socket.on('user_login_resp', function (msg) {
+            console.log(msg);
+            
+        });
+    </script>
+    <div class="container">
+        <button onclick="user_login()" class="btn btn-primary">Отправить запрос</button>
+    </div>
+</body>
+
+</html>
