@@ -1,84 +1,75 @@
 import * as AAClasses from '@a-a-game-studio/aa-classes/lib';
 import { FieldValidator } from '@a-a-game-studio/aa-components/lib';
 import { UserSQL } from './UserSQL';
-
-export interface BaseResponseI {
-   ok: boolean;
-   data: any;
-   errors: any;
-}
+import { UserI } from './UserE';
+import { faUserLoginV } from './UserV';
+import { aSocketClient } from '../Sys/db';
+import { UserLogin } from './UserR';
 
 
-export namespace UserLogin {
-
-   export interface RequestI {
-      login: string;
-      pswd: string;
-   }
-
-   export const sResponse = 'user_login_resp';
-
-   export interface ResponseI extends BaseResponseI {
-      data: {
-         token: string;
-      }
-   }
-}
 
 /**
  * Контролер пользователя
  */
-
-export const faUserLogin = async (socket: any, msg: any, errorSys: AAClasses.Components.ErrorSys, db: any) => {
+export const faUserLogin = async (socket: any, msg: string, errorSys: AAClasses.Components.ErrorSys, db: any) => {
    const userSQL = new UserSQL(errorSys, db);
-   const fieldValidator = new FieldValidator(errorSys, {});
-
+   let cValidator = new FieldValidator(errorSys, {});
    let sToken = '';
+   let user: UserI;
 
    try {
+
       const data: UserLogin.RequestI = JSON.parse(msg);
+      
+      /* валидируем входные данные */
+      cValidator = faUserLoginV(data, cValidator);
 
-      fieldValidator.fSetErrorString('login')
-         .fSetData(data.login)
-         .fExist()
-         .fMinLen(3)
-         .fMaxLen(50);
+      if (!cValidator.fIsOk()) {
+         throw 'error';
+      }
 
-      fieldValidator.fSetErrorString('paswd')
-         .fSetData(data.pswd)
-         .fExist()
-         .fMinLen(3)
-         .fMaxLen(50);
+      /* получаем ответ от DB */
+      sToken = await userSQL.faGetTokenByLoginAndPass(data.login, data.pswd);
 
-         
-
-         if(!fieldValidator.fIsOk()){
-            throw 'error';
-         }
-
-         sToken = await userSQL.faGetTokenByLoginAndPass(data.login, data.pswd);
-
-         fieldValidator.fSetErrorString('token')
+      /* проверяем есть ли токен */
+      cValidator.fSetErrorString('token')
          .fSetData(sToken)
          .fExist()
          .fMinLen(32)
          .fMaxLen(32);
 
+      if (cValidator.fIsOk()) {
+         user = await userSQL.faGetUserInfoByToken(sToken);
+      }
+
 
    } catch (e) {
-      fieldValidator.fSetErrorString('all bad')
-      .fSetData(null)
-      .fExist(e);
-      
+      /* все плохо с базой */
+      cValidator.fSetErrorString('all bad')
+         .fSetData(null)
+         .fExist(e);
    }
 
+   /* формируем ответ */
    const resp: UserLogin.ResponseI = {
-      ok: fieldValidator.fIsOk(),
-      data: {token: sToken},
-      errors: fieldValidator.fGetErrorSys().getErrors()
+      ok: cValidator.fIsOk(),
+      data: {
+         token: sToken,
+         user: user,
+      },
+      errors: cValidator.fGetErrorSys().getErrors()
    }
 
+   /* отправляем клиенту сообщение */
    socket.emit(UserLogin.sResponse, resp);
+
+   /* если все хорошо записываем информацию о юзере в общую память  */
+   if(cValidator.fIsOk()) {
+      aSocketClient[socket.id] = {
+         token: sToken,
+         user: user,
+      }
+   }
 
    console.log('faUserLogin msg', msg);
 

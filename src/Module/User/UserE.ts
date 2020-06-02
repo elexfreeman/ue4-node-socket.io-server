@@ -1,3 +1,5 @@
+import { BaseResponseI } from "../Sys/ResponseSys";
+
 export interface UserI {
     id?: number;
     login?: string;
@@ -13,3 +15,5 @@ export class UserTokenE {
     public static NAME = 'user_token';
     ///....
 }
+
+

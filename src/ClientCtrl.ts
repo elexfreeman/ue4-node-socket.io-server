@@ -8,8 +8,10 @@ import { faUserLogin } from "./Module/User/UserCtrl";
  */
 export const fClientCtrl = (socket: any) => {
 
+    /* конструктор ошибок */
     const errorSys = new AAClasses.Components.ErrorSys();
 
+    /* помещаем клиента в общую память */
     console.log(`Client: ${socket.id} connect`);
     aSocketClient[socket.id] = true;
 

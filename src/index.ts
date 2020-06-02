@@ -1,8 +1,6 @@
 import * as express from 'express';
 import { conf } from "./Module/Config/Config";
-
 import { fClientCtrl } from "./ClientCtrl";
-import { db } from "./Module/Sys/db";
 
 const app = require('express')();
 
@@ -14,7 +12,7 @@ app.get('/', (req: express.Request, res: express.Response) => {
   res.send({});
 });
 
-
+/* контролер socket.io */
 io.on('connection', fClientCtrl);
 
 
