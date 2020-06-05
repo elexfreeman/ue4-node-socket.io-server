@@ -11,7 +11,7 @@ import { UserLogin } from './UserR';
 /**
  * Контролер пользователя
  */
-export const faUserLogin = async (socket: any, msg: string, errorSys: AAClasses.Components.ErrorSys, db: any) => {
+export const faUserLogin = async (socket: any, msg: any, errorSys: AAClasses.Components.ErrorSys, db: any) => {
    const userSQL = new UserSQL(errorSys, db);
    let cValidator = new FieldValidator(errorSys, {});
    let sToken = '';
@@ -19,7 +19,9 @@ export const faUserLogin = async (socket: any, msg: string, errorSys: AAClasses.
 
    try {
 
-      const data: UserLogin.RequestI = JSON.parse(msg);
+
+      const data: UserLogin.RequestI = msg;
+      
       
       /* валидируем входные данные */
       cValidator = faUserLoginV(data, cValidator);
