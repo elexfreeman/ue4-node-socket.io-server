@@ -6,9 +6,9 @@
   "scripts": {
     "build": "tsc",
     "test": "tsc && node ./build/test.js",
-    "server": "./node_modules/.bin/node ./build/index.js",
+    "tcp_login": "./node_modules/.bin/node ./build/tcpSrvLogin.js",
     "tcp": "./node_modules/.bin/node ./build/tcpSrv.js",
-    "watch": "tsc-watch --outDir ./build --onSuccess \"npm run server\"",
+    "wtcp_login": "tsc-watch --outDir ./build --onSuccess \"npm run tcp_login\"",
     "wtcp": "tsc-watch --outDir ./build --onSuccess \"npm run tcp\""
   },
   "author": "",
@@ -18,7 +18,6 @@
     "@a-a-game-studio/aa-components": "^1.0.34",
     "@types/moment": "^2.13.0",
     "@types/node": "^14.0.6",
-    "express": "^4.17.1",
     "knex": "^0.21.1",
     "moment": "^2.26.0",
     "mysql": "^2.18.1",

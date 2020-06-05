@@ -6,9 +6,9 @@ import { UserI } from "./UserE";
  */
 export namespace UserLogin {
 
-   export const sRequest = 'user_login_req';
+   export const sRequestRoute = 'user_login_req';
  
-   export const sResponse = 'user_login_resp';
+   export const sResponseRoute = 'user_login_resp';
 
     export interface RequestI {
        login: string;

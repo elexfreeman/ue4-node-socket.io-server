@@ -2,7 +2,11 @@ import * as net from "net";
 const moment = require('moment');
 
 import { fGenerateToken } from "./Lib/HashFunc";
-import { aSocketClient } from "./Module/Sys/db";
+import { aSocketClient, db } from "./Module/Sys/db";
+import * as AAClasses from '@a-a-game-studio/aa-classes/lib';
+import { faUserLogin } from "./Module/User/UserCtrl";
+import { fBaseRequest, fRequest } from "./Module/Sys/ResponseSys";
+import { UserLogin } from "./Module/User/UserR";
 
 /**
  * Текущая дата
@@ -20,20 +24,27 @@ const server = net.createServer((socket: net.Socket) => {
 
     console.log(`[${fGetNowDataStr()}] Client connect ${clientToken}`);
 
-    /* отправка через интервал  */
-    const t = setInterval(() => {
-        socket.write('Ping test');
-    }, 3000);
-
 
     /* получение данных от клиента */
-    socket.on('data', (data: Buffer) => {
+    socket.on('data', async (data: Buffer) => {
+        const errorSys = new AAClasses.Components.ErrorSys();
+
         console.log(`[${fGetNowDataStr()}] Data from [${clientToken}]: `, data.toString());
+
+        const request: fBaseRequest = fRequest(data, clientToken);
+
+        /* подключаем котролер логина */
+        if (request.sRoute == UserLogin.sRequestRoute) {
+            await faUserLogin(socket, request, errorSys, db);
+        } else {
+            /* если маршрут не совпал, отправляет строчку */
+            socket.write('Ping test');
+        }
+
     });
 
     /* клиент отключися */
     socket.on('end', () => {
-        clearInterval(t);
         delete aSocketClient[clientToken];
         console.log(`[${fGetNowDataStr()}] Client ${clientToken} disconnect`);
     });

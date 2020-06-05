@@ -1,17 +1,21 @@
-import * as AAClasses from '@a-a-game-studio/aa-classes/lib';
+import { Components  } from '@a-a-game-studio/aa-classes/lib';
 import { FieldValidator } from '@a-a-game-studio/aa-components/lib';
 import { UserSQL } from './UserSQL';
 import { UserI } from './UserE';
 import { faUserLoginV } from './UserV';
 import { aSocketClient } from '../Sys/db';
 import { UserLogin } from './UserR';
+import * as net from "net";
+import { fBaseRequest, fResponse } from '../Sys/ResponseSys';
+
 
 
 
 /**
  * Контролер пользователя
  */
-export const faUserLogin = async (socket: any, msg: any, errorSys: AAClasses.Components.ErrorSys, db: any) => {
+export const faUserLogin = async (socket: net.Socket, request: fBaseRequest, errorSys: Components.ErrorSys, db: any) => {
+
    const userSQL = new UserSQL(errorSys, db);
    let cValidator = new FieldValidator(errorSys, {});
    let sToken = '';
@@ -19,10 +23,8 @@ export const faUserLogin = async (socket: any, msg: any, errorSys: AAClasses.Com
 
    try {
 
+      const data: UserLogin.RequestI = request.data;
 
-      const data: UserLogin.RequestI = msg;
-      
-      
       /* валидируем входные данные */
       cValidator = faUserLoginV(data, cValidator);
 
@@ -54,6 +56,7 @@ export const faUserLogin = async (socket: any, msg: any, errorSys: AAClasses.Com
 
    /* формируем ответ */
    const resp: UserLogin.ResponseI = {
+      sRoute: UserLogin.sResponseRoute,
       ok: cValidator.fIsOk(),
       data: {
          token: sToken,
@@ -63,16 +66,16 @@ export const faUserLogin = async (socket: any, msg: any, errorSys: AAClasses.Com
    }
 
    /* отправляем клиенту сообщение */
-   socket.emit(UserLogin.sResponse, resp);
+   fResponse(socket, resp);
 
    /* если все хорошо записываем информацию о юзере в общую память  */
-   if(cValidator.fIsOk()) {
-      aSocketClient[socket.id] = {
+   if (cValidator.fIsOk()) {
+      aSocketClient[request.sClientToken] = {
          token: sToken,
          user: user,
       }
    }
 
-   console.log('faUserLogin msg', msg);
+   console.log('faUserLogin msg', request.data);
 
 }
