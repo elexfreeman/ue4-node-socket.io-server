@@ -5,7 +5,7 @@ import { fGenerateToken } from "./Lib/HashFunc";
 import { aSocketClient, db } from "./Module/Sys/db";
 import * as AAClasses from '@a-a-game-studio/aa-classes/lib';
 import { faUserLogin } from "./Module/User/UserCtrl";
-import { fBaseRequest, fRequest } from "./Module/Sys/ResponseSys";
+import { fBaseRequest, fRequest, fResponse } from "./Module/Sys/ResponseSys";
 import { UserLogin } from "./Module/User/UserR";
 
 /**
@@ -38,7 +38,12 @@ const server = net.createServer((socket: net.Socket) => {
             await faUserLogin(socket, request, errorSys, db);
         } else {
             /* если маршрут не совпал, отправляет строчку */
-            socket.write('Ping test');
+            fResponse(socket, {
+                sRoute: '',
+                ok:true,
+                data: {},
+                errors: [],
+            });
         }
 
     });
